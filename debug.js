@@ -45,12 +45,12 @@ define(function(require, exports, module) {
         var SETTING_VER="project/cs50/debug/@ver";
 
         // version of debug50 file
-        var DEBUG_VER=8;
+        var DEBUG_VER=9;
 
         /***** Methods *****/
 
         /**
-         * Helper function for gdb50Start to display errors.
+         * Helper function for startdebug50 to display errors.
          */
         function handleErr(proc, err) {
             showError(proc, "error:", err);
@@ -135,10 +135,10 @@ define(function(require, exports, module) {
          * monitors the shim process and is used by the debugger
          * API to determine if the process is still running.
          * Execute with:
-         * `c9 exec gdb50start; node ~/.c9/bin/c9gdbshim.js BIN ARGS`;
-         *  c9 exec gdb50stop`
+         * `c9 exec startdebug50; node ~/.c9/bin/c9gdbshim.js BIN ARGS`;
+         *  c9 exec stopdebug50`
          */
-        function gdb50Start(args, reconnect) {
+        function startdebug50(args, reconnect) {
             if (args.length != 2) {
                 showError("Error: expected process PID!");
                 return false;
@@ -168,10 +168,9 @@ define(function(require, exports, module) {
         }
 
         /**
-         * gdb50Stop
-         * Stops and cleans a debug process started with gdb50Start.
+         * Stops and cleans a debug process started with startdebug50.
          */
-        function gdb50Stop(args) {
+        function stopdebug50(args) {
             if (args.length != 2) {
                 showError("Error: expected process PID!");
                 return false;
@@ -295,17 +294,17 @@ define(function(require, exports, module) {
 
             // create commands that can be called from `c9 exec`
             commands.addCommand({
-                name: "gdb50start",
+                name: "startdebug50",
                 hint: "Kickstart GDB debugger from CLI",
                 group: "Run & Debug",
-                exec: gdb50Start
+                exec: startdebug50
             }, plugin);
 
             commands.addCommand({
-                name: "gdb50stop",
+                name: "stopdebug50",
                 hint: "Stop GDB debugger started from CLI",
                 group: "Run & Debug",
-                exec: gdb50Stop
+                exec: stopdebug50
             }, plugin);
 
             commands.addCommand({

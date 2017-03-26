@@ -5,9 +5,9 @@
 This plugin adds Cloud9 commands that allow execution of the debugger from the
 command line.
 
-### `gdb50{start,stop}`
+### `{start,stop}debug50`
 
-The `gdb50start` and `gdb50stop` commands try to allow the user to execute their
+The `startdebug50` and `stopdebug50` commands try to allow the user to execute their
 binary directly in a terminal window, but still connect the GUI debugger to the
 running process without opening a new console window.
 
@@ -30,7 +30,7 @@ The internal state of the `process` object (and therefore the `run` and `debug`
 objects) can then stay consistent.
 
 Process management is therefore required for this to work. We create a process
-in the shell, provide the PID of that process to `gdb50start`, which then
+in the shell, provide the PID of that process to `startdebug50`, which then
 creates the "proxy" process to monitor it. If everything checks out, the plugin
 sends `debug50` a `SIGUSR1` signal, which then uses that to start the shim
 process.
@@ -38,7 +38,7 @@ process.
 This signal prevents starting the shim prematurely; for example, if the user
 selects when asked that they do not wish to stop an existing debug process.
 
-If the shim is begun, `gdb50stop` is called after debugging is complete, and
+If the shim is begun, `stopdebug50` is called after debugging is complete, and
 provided the same PID, to clean up the tmux session and `process` and `debug`
 object state.
 
