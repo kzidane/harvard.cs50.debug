@@ -2,7 +2,7 @@
 
 # check args
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 executable [arguments]"
+    echo "Usage: debug50 executable [arguments]"
     exit 1
 fi
 
@@ -16,14 +16,19 @@ C9="$C9 exec"
 
 # allow force-stopping
 if [ "$1" = "-HUP" ]; then
-    $C9 gdb50forcestop
+    $C9 stopdebug50
     exit 0
 fi
+
+# ensure executable exists
+if [ ! -f "$1" ]; then
+    echo "debug50: $1: No such file!"
+    exit 1
 
 # ensure file is executable and debuggable
 # http://stackoverflow.com/a/10319835/1797347
 # http://stackoverflow.com/a/12801855/1797347
-if ! [ $(file "$1" | grep -o executable) ]; then
+elif ! [ $(file "$1" | grep -o executable) ]; then
     echo "Can't debug this program! Afraid debug50 only supports compiled C programs!"
     exit 1
 elif ! [ "$(readelf -wL "$1")" ]; then

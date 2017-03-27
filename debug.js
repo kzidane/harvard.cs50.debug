@@ -2,15 +2,14 @@ define(function(require, exports, module) {
     "use strict";
 
     main.consumes = [
-        "Plugin", "commands", "dialog.question", "dialog.error", "debugger",
-        "fs", "proc", "run", "run.gui", "settings", "util", "watcher"
+        "Plugin", "commands", "dialog.error", "debugger", "fs", "proc", "run",
+        "run.gui", "settings", "util", "watcher"
     ];
     main.provides = ["harvard.cs50.debug"];
     return main;
 
     function main(options, imports, register) {
         var Plugin = imports.Plugin;
-        var askQuestion = imports["dialog.question"].show;
         var commands = imports.commands;
         var debug = imports.debugger;
         var fs = imports.fs;
@@ -26,7 +25,7 @@ define(function(require, exports, module) {
 
         /***** Initialization *****/
         var plugin = new Plugin("Ajax.org", main.consumes);
-        var process = [];
+        var process = {};
         var debugging = false;
 
         // delay execution of next debugging process if old is killed
@@ -113,7 +112,7 @@ define(function(require, exports, module) {
             if (debugging)
                 debug.stop();
 
-            if (pid)
+            if (process.hasOwnProperty(pid))
                 delete process[pid];
 
             debugging = false;
@@ -171,14 +170,22 @@ define(function(require, exports, module) {
          * Stops and cleans a debug process started with startdebug50.
          */
         function stopdebug50(args) {
-            if (args.length != 2) {
-                showError("Error: expected process PID!");
+            if (args && args.length > 2) {
+                console.error("Usage: c9 exec stopdebug50 [PID]");
                 return false;
             }
 
             // close debugger right away (waiting for proc to stop takes time)
             if (debugging)
                 debug.stop();
+
+            // allow force-stopping any debugging process started with startdebug50
+            if (!args || args.length < 2) {
+                for (var pid in process)
+                    process[pid].stop();
+
+                return;
+            }
 
             // process pid passed by argument
             var pid = args[1];
@@ -305,34 +312,6 @@ define(function(require, exports, module) {
                 hint: "Stop GDB debugger started from CLI",
                 group: "Run & Debug",
                 exec: stopdebug50
-            }, plugin);
-
-            commands.addCommand({
-                name: "gdb50forcestop",
-                hint: "Force-stop GDB debugger",
-                group: "Run & Debug",
-                exec: function() {
-                    askQuestion(
-                        "Stop debugging", "",
-                        "Are you sure you want to force-stop the debugger?",
-
-                        // Yes
-                        function() {
-                            process.forEach(function(r, pid) {
-                                 gdb50Stop([null, pid]);
-                            });
-                        },
-
-                        // No
-                        function() {},
-
-                        // hide "All" and "Cancel" buttons
-                        {
-                            all: false,
-                            cancel: false
-                        }
-                    );
-                }
             }, plugin);
 
             // write debug50 when should
